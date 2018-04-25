@@ -10,14 +10,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.solutionladder.ethearts.model.request.AuthenticationRequest;
 import com.solutionladder.ethearts.persistence.entity.Member;
 import com.solutionladder.ethearts.persistence.repository.AuthenticationResponse;
-import com.solutionladder.ethearts.security.TokenUtil;
+import com.solutionladder.ethearts.service.CustomUserDetailsService;
 import com.solutionladder.ethearts.service.MemberService;
 
 /**
@@ -48,9 +41,6 @@ public class MemberController {
 
     @Autowired
     private MemberService memberService;
-    
-    @Autowired
-    private AuthenticationManager authenticationManager;
 
     @GetMapping(path= {"", "/"})
     public Iterable<Member> list() {
@@ -110,30 +100,17 @@ public class MemberController {
 
     @Autowired
     @Qualifier("customUserDetailsService")
-    private UserDetailsService customUserDetailsService;
+    private CustomUserDetailsService customUserDetailsService;
 
-    @RequestMapping(value = "/authenticate", method = { RequestMethod.POST })
+    @RequestMapping(value = "/authenticate", method={ RequestMethod.POST })
     public ResponseEntity<AuthenticationResponse> authenticate(
             @RequestBody AuthenticationRequest authenticationRequest) {
 
         try {
-            String username = authenticationRequest.getEmail();
-            String password = authenticationRequest.getPassword();
-
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-            Authentication authentication = this.authenticationManager.authenticate(token);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
-
-            List<String> roles = new ArrayList<>();
-
-            for (GrantedAuthority authority : userDetails.getAuthorities()) {
-                roles.add(authority.toString());
-            }
-
-            return new ResponseEntity<AuthenticationResponse>(new AuthenticationResponse(userDetails.getUsername(), roles,
-                    TokenUtil.createToken(userDetails), HttpStatus.OK), HttpStatus.OK);
-
+            AuthenticationResponse authenticationResponse = this.customUserDetailsService.authenticate(
+                    authenticationRequest.getEmail(),
+                    authenticationRequest.getPassword());
+            return new ResponseEntity<>(authenticationResponse, HttpStatus.OK);
         } catch (BadCredentialsException bce) {
             return new ResponseEntity<AuthenticationResponse>(new AuthenticationResponse(), HttpStatus.UNPROCESSABLE_ENTITY);
 
@@ -156,7 +133,7 @@ public class MemberController {
 
         return cities;
     }
-    
+
     /**
      * Just for testing the security to be moved to testing
      * @return

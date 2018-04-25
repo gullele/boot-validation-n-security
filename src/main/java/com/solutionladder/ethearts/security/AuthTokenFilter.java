@@ -27,7 +27,7 @@ public class AuthTokenFilter extends GenericFilterBean {
      * Authorization: Bearer <token> in the header
      * But this is not uncommen as well
      */
-    private String authTokenHeaderName = "x-auth-token";
+    private final static String AUTH_TOKEN_HEADER_NAME = "x-auth-token";
 
     public AuthTokenFilter(UserDetailsService userDetailsService) {
         this.customUserDetailsService = userDetailsService;
@@ -39,8 +39,8 @@ public class AuthTokenFilter extends GenericFilterBean {
         
         try {
             HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
-            String authToken = httpServletRequest.getHeader(authTokenHeaderName);
-            
+            String authToken = httpServletRequest.getHeader(AUTH_TOKEN_HEADER_NAME);
+
             if (StringUtils.hasText(authToken)) {
                 
                 String username = TokenUtil.getUserNameFromToken(authToken);
