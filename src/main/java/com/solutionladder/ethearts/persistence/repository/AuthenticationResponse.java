@@ -3,8 +3,6 @@ package com.solutionladder.ethearts.persistence.repository;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-
 /**
  * Response for authentication
  * 

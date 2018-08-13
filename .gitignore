@@ -28,3 +28,6 @@
 
 ### Eclipse
 .DS_Store
+
+### properties
+/src/main/resources/application.properties
