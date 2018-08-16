@@ -3,7 +3,8 @@ package com.solutionladder.ethearts.service;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.solutionladder.ethearts.persistence.entity.Member;
@@ -19,8 +20,10 @@ import com.solutionladder.ethearts.persistence.repository.MemberRepository;
 // public class MemberService implements UserDetailsService {
 public class MemberService {
 
+//    @Autowired
+//    private BCryptPasswordEncoder bcryptPasswordEncoder;
     @Autowired
-    private BCryptPasswordEncoder bcryptPasswordEncoder;
+    private PasswordEncoder bcryptPasswordEncoder;
 
     @Autowired
     public MemberRepository memberRepository;

@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 import javax.validation.constraints.Email;
@@ -39,6 +40,12 @@ public class Member extends DatedEntity{
     @Column(unique = true)
     @UniqueEmail
     private String email;
+    
+    /**
+     * Salt to be on password hashing and later by token as well.
+     * @see TokenUtil
+     */
+    private String salt;
 
     @Transient
     @NotEmpty(message = "Password cannot be empty")
@@ -51,7 +58,13 @@ public class Member extends DatedEntity{
     @MinimumAge(value = 18)
     private LocalDate dateOfBirth;
 
-    @ManyToMany(cascade = CascadeType.DETACH)
+    /**
+     * Used FetchType.EAGER as quick fix for spring security.
+     * When the token is retrieving user information thru CustomUserDetails#loadUserByUsername,
+     * It will pick the username but the role is not loaded lazily in the right manner.
+     * Having member pulled along with role has performance toll.
+     */
+    @ManyToMany(cascade = CascadeType.DETACH, fetch=FetchType.EAGER)
     private List<Role> roles;
 
     public String getFirstName() {
@@ -92,6 +105,14 @@ public class Member extends DatedEntity{
 
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
+    }
+
+    public String getSalt() {
+        return salt;
+    }
+
+    public void setSalt(String salt) {
+        this.salt = salt;
     }
 
     public LocalDate getDateOfBirth() {

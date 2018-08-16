@@ -9,6 +9,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 
 import com.solutionladder.ethearts.model.response.GenericResponse;
+import com.solutionladder.ethearts.persistence.entity.Member;
 
 /**
  * Abstract base controller for controllers
@@ -40,5 +41,16 @@ public abstract class BaseController {
            messages.add(error.getDefaultMessage());
         }
         return this.responseError(messages, HttpStatus.BAD_REQUEST);
+    }
+    
+    /**
+     * Get logged member from token. Basically the token will contain lots of information about the 
+     * logged user and one of the info will be mebmerId, username and maybe email
+     * The member provided by this class does not contain full member information
+     * 
+     * @return
+     */
+    protected Member getLoggedMemberId() {
+        return null;
     }
 }

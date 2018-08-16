@@ -37,6 +37,7 @@ public class HelpController extends BaseController{
     private HelpService helpService;
 
     @GetMapping(path= {"", "/"})
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
     public Iterable<Help> list() {
         return this.helpService.getAll();
     }
@@ -47,6 +48,7 @@ public class HelpController extends BaseController{
      * @return
      */
     @PutMapping(path= {"", "/"})
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
     public ResponseEntity<Help> edit(
             @Valid @RequestBody Help help) {
         this.helpService.save(help);
@@ -57,6 +59,7 @@ public class HelpController extends BaseController{
             path= {"/helptype", "/helptype/"},
             consumes="application/json",
             produces="application/json")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR')")
     public ResponseEntity<GenericResponse> addHelpType(
             @Valid @RequestBody HelpType helpType,
             BindingResult bindingResult) {
@@ -83,7 +86,7 @@ public class HelpController extends BaseController{
             path= {"/support", "/support/"},
             consumes="application/json",
             produces="application/json")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
     public ResponseEntity<GenericResponse> addHelpContribution(
             @Valid @RequestBody Contribution contribution,
             BindingResult bindingResult) {
@@ -108,6 +111,7 @@ public class HelpController extends BaseController{
             path= {"/", ""}, 
             consumes="application/json", 
             produces="application/json")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
     public ResponseEntity<Help> create(
             @Valid @RequestBody Help help) {
         this.helpService.save(help);
