@@ -11,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,18 +37,19 @@ import com.solutionladder.ethearts.service.MemberService;
  */
 @RestController
 @RequestMapping(path = "/member")
-@CrossOrigin(origins = { "http://localhost:8080", "*" })
+@CrossOrigin
 public class MemberController {
 
     @Autowired
     private MemberService memberService;
-    
+
     @Autowired
-    private MemberRepository repository; //this has to be moved never use this in controller
-    
+    private MemberRepository repository; // this has to be moved never use this
+                                         // in controller
+
     @Autowired
     private AuthenticationManager authenticationManager;
-    
+
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
@@ -108,19 +108,15 @@ public class MemberController {
     @RequestMapping(value = "/authenticate", method = { RequestMethod.POST })
     public ResponseEntity<String> signin(@RequestBody AuthenticationRequest authReq) {
         try {
-          authenticationManager.authenticate(
-                  new UsernamePasswordAuthenticationToken(
-                          authReq.getEmail(), 
-                          authReq.getPassword()
-                          )
-                  );
-          Optional<Member> member = repository.findByEmail(authReq.getEmail());
-          String token = jwtTokenProvider.createToken(authReq.getEmail(), member.get().getRoles());
+            authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(authReq.getEmail(), authReq.getPassword()));
+            Optional<Member> member = repository.findByEmail(authReq.getEmail());
+            String token = jwtTokenProvider.createToken(authReq.getEmail(), member.get().getRoles());
 
-          return new ResponseEntity<>(token, HttpStatus.OK);
-          
+            return new ResponseEntity<>(token, HttpStatus.OK);
+
         } catch (AuthenticationException e) {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }
-      }
+    }
 }
