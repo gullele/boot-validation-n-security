@@ -6,8 +6,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
- * Adding CORS request from any origin
- * 
+ * Adding CORS request from any or
  * @author Kaleb Woldearegay <kaleb@solutionladder.com>
  *
  */
