@@ -1,7 +1,7 @@
 .gradle
 /build/
 !gradle/wrapper/gradle-wrapper.jar
-
+bin/
 ### STS ###
 .apt_generated
 .classpath
@@ -28,3 +28,6 @@
 
 ### Eclipse
 .DS_Store
+
+### properties
+/src/main/resources/application.properties
