@@ -20,7 +20,7 @@ public class EtheartsApplication {
 	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 	    CorsConfiguration config = new CorsConfiguration();
 	    config.setAllowCredentials(true);
-	    config.addAllowedOrigin("*");
+	    config.addAllowedOrigin("http://localhost:9090");
 	    config.addAllowedHeader("*");
 	    config.addAllowedMethod("*");
 	    source.registerCorsConfiguration("/**", config);

@@ -2,6 +2,7 @@ package com.solutionladder.ethearts.contoller;
 
 import java.util.Optional;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,11 +121,11 @@ public class MemberController {
         }
     }
     
-    @RequestMapping(
-            value = "/**",
-            method = RequestMethod.OPTIONS
-    )
-    public ResponseEntity<Integer> handle() {
-        return new ResponseEntity<Integer>(HttpStatus.OK);
+    @RequestMapping(value= "/**", method=RequestMethod.OPTIONS)
+    public void corsHeaders(HttpServletResponse response) {
+        response.addHeader("Access-Control-Allow-Origin", "*");
+        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+        response.addHeader("Access-Control-Max-Age", "3600");
     }
 }
