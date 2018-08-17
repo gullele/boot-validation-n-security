@@ -119,4 +119,12 @@ public class MemberController {
             return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
         }
     }
+    
+    @RequestMapping(
+            value = "/**",
+            method = RequestMethod.OPTIONS
+    )
+    public ResponseEntity<Integer> handle() {
+        return new ResponseEntity<Integer>(HttpStatus.OK);
+    }
 }
