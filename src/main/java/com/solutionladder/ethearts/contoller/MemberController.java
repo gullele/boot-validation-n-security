@@ -37,7 +37,7 @@ import com.solutionladder.ethearts.service.MemberService;
  */
 @RestController
 @RequestMapping(path = "/member")
-@CrossOrigin
+@CrossOrigin(origins= {"*", "http://localhost:9090"})
 public class MemberController {
 
     @Autowired
