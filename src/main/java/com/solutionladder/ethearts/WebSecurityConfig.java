@@ -1,25 +1,35 @@
 package com.solutionladder.ethearts;
 
-import java.util.Arrays;
-
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
 
+@Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:9090"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT", "DELETE"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+
+        http
+            // your security config here
+            .authorizeRequests()
+            .antMatchers(HttpMethod.TRACE, "/**").denyAll()
+            .antMatchers("/admin/**").authenticated()
+            .anyRequest().permitAll()
+            .and().httpBasic()
+            .and().headers().frameOptions().disable()
+            .and().csrf().disable()
+            .headers()
+            // the headers you want here. This solved all my CORS problems! 
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Origin", "*"))
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Methods", "POST, GET, PUT"))
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Max-Age", "3600"))
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Credentials", "true"))
+            .addHeaderWriter(new StaticHeadersWriter("Access-Control-Allow-Headers", "Origin,Accept,X-Requested-With,Content-Type,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization"));
     }
 }
