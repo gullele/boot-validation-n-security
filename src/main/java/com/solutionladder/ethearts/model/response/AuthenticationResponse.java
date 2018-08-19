@@ -1,8 +1,5 @@
 package com.solutionladder.ethearts.model.response;
 
-import java.util.Collections;
-import java.util.List;
-
 /**
  * Response for authentication
  * 

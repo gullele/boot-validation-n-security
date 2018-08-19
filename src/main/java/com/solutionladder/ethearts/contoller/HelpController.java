@@ -26,7 +26,6 @@ import com.solutionladder.ethearts.persistence.entity.Help;
 import com.solutionladder.ethearts.persistence.entity.HelpType;
 import com.solutionladder.ethearts.persistence.entity.Member;
 import com.solutionladder.ethearts.security.CustomUser;
-import com.solutionladder.ethearts.security.JwtTokenProvider;
 import com.solutionladder.ethearts.service.HelpService;
 
 /**

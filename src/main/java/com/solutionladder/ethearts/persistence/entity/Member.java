@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.solutionladder.ethearts.model.errorhandler.MinimumAge;
 import com.solutionladder.ethearts.model.errorhandler.UniqueEmail;
+import com.solutionladder.ethearts.security.TokenUtil;
 
 /**
  * Member persistence model

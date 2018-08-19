@@ -1,6 +1,7 @@
 package com.solutionladder.ethearts.persistence.entity;
 
 import javax.persistence.Entity;
+
 import org.springframework.security.core.GrantedAuthority;
 /**
  * Model representing role class
