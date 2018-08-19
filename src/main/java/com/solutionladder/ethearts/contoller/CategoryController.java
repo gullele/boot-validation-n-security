@@ -26,7 +26,7 @@ import com.solutionladder.ethearts.service.CategoryService;
  *
  */
 @RestController
-@RequestMapping(path="/category")
+@RequestMapping(path="/api/category")
 @CrossOrigin(origins = {"http://localhost:8080", "*"})
 public class CategoryController extends BaseController{
 

@@ -45,6 +45,7 @@ public class Member extends DatedEntity{
      * Salt to be on password hashing and later by token as well.
      * @see TokenUtil
      */
+    @JsonProperty(access = Access.WRITE_ONLY)
     private String salt;
 
     @Transient
@@ -64,11 +65,12 @@ public class Member extends DatedEntity{
      * It will pick the username but the role is not loaded lazily in the right manner.
      * Having member pulled along with role has performance toll.
      */
+    @JsonProperty(access = Access.WRITE_ONLY)
     @ManyToMany(cascade = CascadeType.DETACH, fetch=FetchType.EAGER)
     private List<Role> roles;
 
     public String getFirstName() {
-        return firstName;
+        return this.firstName;
     }
 
     public void setFirstName(String firstName) {
@@ -76,7 +78,7 @@ public class Member extends DatedEntity{
     }
 
     public String getLastName() {
-        return lastName;
+        return this.lastName;
     }
 
     public void setLastName(String lastName) {

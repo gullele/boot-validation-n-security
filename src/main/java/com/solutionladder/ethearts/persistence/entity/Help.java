@@ -39,7 +39,6 @@ public class Help extends DatedEntity{
     @NotEmpty(message = "Title can not be null")
     private String title;
 
-    @NotNull(message = "member not selected")
     @ManyToOne
     private Member member;
 

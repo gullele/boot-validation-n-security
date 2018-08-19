@@ -37,20 +37,24 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         // Entry points
         http.authorizeRequests()//
-                .antMatchers(HttpMethod.POST, "/member/authenticate").permitAll()//
-                .antMatchers(HttpMethod.POST, "/member/login").permitAll()//
-                .antMatchers(HttpMethod.POST, "/member").permitAll().antMatchers("/h2-console/**/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/**").permitAll()
+                .antMatchers(HttpMethod.PUT, "/api/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/**").permitAll()
+                .antMatchers(HttpMethod.DELETE, "/api/**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/member/login").permitAll()//
+                .antMatchers(HttpMethod.POST, "/api/member").permitAll().antMatchers("/h2-console/**/**").permitAll()
                 // Disallow everything else..
                 .anyRequest().authenticated();
 
         // If a user try to access a resource without having enough permissions
-        http.exceptionHandling().accessDeniedPage("/member/login");
+        http.exceptionHandling().accessDeniedPage("/api/member/login");//there is no form anyway
 
         // Apply JWT
         http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
 
         // Optional, if you want to test the API from a browser
-        // http.httpBasic();
+        //http.httpBasic();
     }
 
     @Override
