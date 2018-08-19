@@ -12,13 +12,23 @@ public class ErrorDetails {
     private Date timestamp;
     private String message;
     private List<String> details;
+    private String detail;
 
-    public ErrorDetails(Date timestamp, String message, List<String> details) {
+    public ErrorDetails(Date timestamp, String message, String detail) {
       super();
       this.timestamp = timestamp;
       this.message = message;
-      this.details = details;
+      //this.details = details;
+      this.detail = detail;
     }
+    
+    public ErrorDetails(Date timestamp, String message, List<String> details) {
+        super();
+        this.timestamp = timestamp;
+        this.message = message;
+        //this.details = details;
+        this.details = details;
+      }
 
     public Date getTimestamp() {
         return timestamp;
@@ -42,5 +52,13 @@ public class ErrorDetails {
 
     public void setDetails(List<String> details) {
         this.details = details;
+    }
+    
+    public void setDetail(String detail) {
+        this.detail = detail;
+    }
+    
+    public String getDetail() {
+        return this.detail;
     }
 }

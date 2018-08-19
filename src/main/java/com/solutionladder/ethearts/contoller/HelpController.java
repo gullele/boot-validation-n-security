@@ -1,6 +1,7 @@
 package com.solutionladder.ethearts.contoller;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -10,22 +11,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.solutionladder.ethearts.model.errorhandler.InvalidArgumentException;
 import com.solutionladder.ethearts.model.response.GenericResponse;
 import com.solutionladder.ethearts.persistence.entity.Contribution;
 import com.solutionladder.ethearts.persistence.entity.Help;
 import com.solutionladder.ethearts.persistence.entity.HelpType;
-import com.solutionladder.ethearts.persistence.entity.Member;
-import com.solutionladder.ethearts.security.CustomUser;
 import com.solutionladder.ethearts.service.HelpService;
 
 /**
@@ -77,14 +77,19 @@ public class HelpController extends BaseController {
     public ResponseEntity<Help> save(@Valid @RequestBody Help help)
             throws JsonParseException, JsonMappingException, IOException {
 
-        CustomUser user = (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        Member member = new Member();
-        member.setId(user.getMemberId());
-
-        help.setMember(member);
+        help.setMember(this.getCurrentMember());
         this.helpService.save(help);
         return new ResponseEntity<>(help, HttpStatus.OK);
+    }
+    
+    @GetMapping(path = {"{id}", "/{id}"})
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
+    public Help getById(@PathVariable("id") Long id) {
+        if (id == null || id <= 0) {
+            throw new InvalidArgumentException("Invalid Id", null, null);
+        }
+
+        return this.helpService.get(id);
     }
 
     @PostMapping(path = { "/helptype", "/helptype/" }, consumes = "application/json", produces = "application/json")

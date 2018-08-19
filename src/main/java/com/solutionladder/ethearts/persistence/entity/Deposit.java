@@ -15,11 +15,10 @@ import javax.validation.constraints.NotNull;
 public class Deposit extends DatedEntity {
 
     @ManyToOne
-    @NotNull(message = "member has to be provided")
     private Member member;
 
     @NotNull(message = "Donation can not be blank")
-    @DecimalMin(value = "0.2", message = "Donation starts with 20 cents")
+    @DecimalMin(value = "2.0", message = "Donation starts with 2.0 dollar")
     private Double deposit;
 
     public Member getMember() {

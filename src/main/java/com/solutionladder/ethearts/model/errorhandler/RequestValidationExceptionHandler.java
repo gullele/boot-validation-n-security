@@ -9,8 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -24,20 +24,26 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestController
 public class RequestValidationExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
-            HttpHeaders headers, HttpStatus status, WebRequest request) {
+    @ExceptionHandler(InvalidArgumentException.class)
+    protected ResponseEntity<Object> handleInvalidArgumentException(InvalidArgumentException exception,
+             WebRequest request) {
         List<String> messages = this.getValidationErrors(exception.getBindingResult());
+        if (exception.getAdditionalMessages() != null) {
+            messages.addAll(exception.getAdditionalMessages());
+        }
         
         ErrorDetails errorDetails = new ErrorDetails(new Date(), "Validation Failure", 
                 messages);
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
+
     
     private List<String> getValidationErrors(BindingResult bindingResult) {
         List<String> messages = new ArrayList<>();
-        for (ObjectError error : bindingResult.getAllErrors()) {
-           messages.add(error.getDefaultMessage());
+        if (bindingResult != null) {
+            for (ObjectError error : bindingResult.getAllErrors()) {
+               messages.add(error.getDefaultMessage());
+            }
         }
         return messages;
     }

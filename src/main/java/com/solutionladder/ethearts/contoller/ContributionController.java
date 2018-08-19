@@ -1,10 +1,15 @@
 package com.solutionladder.ethearts.contoller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,9 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.solutionladder.ethearts.model.errorhandler.InvalidArgumentException;
 import com.solutionladder.ethearts.model.response.GenericResponse;
 import com.solutionladder.ethearts.persistence.entity.Deposit;
+import com.solutionladder.ethearts.persistence.entity.Member;
 import com.solutionladder.ethearts.persistence.entity.MonetaryDonation;
+import com.solutionladder.ethearts.security.CustomUser;
 import com.solutionladder.ethearts.service.DonationService;
 
 /**
@@ -69,17 +77,21 @@ public class ContributionController extends BaseController {
      * 
      * @return
      */
-    @PostMapping(path= {"/deposit", "/deposit/"})
+    @PostMapping(path = { "/deposit", "/deposit/" })
     public ResponseEntity<GenericResponse> deposit(@Valid @RequestBody Deposit deposit, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return this.checkValidationErrors(bindingResult);
         }
 
-        if (deposit.getDeposit() >= 0.2d) {
-            deposit = this.donationService.saveDeposit(deposit);
-            return new ResponseEntity<>(null, HttpStatus.CREATED);
-        }
+        GenericResponse response = this.getInitalGenericResponse();
 
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        try {
+            deposit.setMember(this.getCurrentMember());
+            deposit = this.donationService.saveDeposit(deposit);
+            response.setSuccess(true);
+            return new ResponseEntity<>(response, HttpStatus.CREATED);
+        } catch (Exception ex) {
+            throw new InvalidArgumentException("another error here", null, Arrays.asList());
+        }
     }
 }
