@@ -1,8 +1,10 @@
 package com.solutionladder.ethearts.contoller;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.solutionladder.ethearts.model.request.AuthenticationRequest;
+import com.solutionladder.ethearts.model.response.AuthenticationResponse;
+import com.solutionladder.ethearts.model.response.GenericResponse;
 import com.solutionladder.ethearts.persistence.entity.Member;
 import com.solutionladder.ethearts.persistence.repository.MemberRepository;
 import com.solutionladder.ethearts.security.JwtTokenProvider;
@@ -37,8 +41,8 @@ import com.solutionladder.ethearts.service.MemberService;
  *
  */
 @RestController
-@RequestMapping(path = "/member")
-@CrossOrigin(origins= {"*", "http://localhost:9090"}, allowCredentials="true")
+@RequestMapping(path = "/api/member")
+@CrossOrigin(origins = { "*" })
 public class MemberController {
 
     @Autowired
@@ -54,7 +58,7 @@ public class MemberController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @GetMapping(path = { "", "/" })
+    @GetMapping(path = { "", "/" }, consumes = "application/json", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADMINISTRATOR')")
     public Iterable<Member> list() {
         return this.memberService.getAll();
@@ -107,25 +111,26 @@ public class MemberController {
     }
 
     @RequestMapping(value = "/authenticate", method = { RequestMethod.POST })
-    public ResponseEntity<String> signin(@RequestBody AuthenticationRequest authReq) {
+    public ResponseEntity<GenericResponse> signin(@RequestBody AuthenticationRequest authReq) {
+        GenericResponse response = new GenericResponse();
         try {
             authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(authReq.getEmail(), authReq.getPassword()));
             Optional<Member> member = repository.findByEmail(authReq.getEmail());
-            String token = jwtTokenProvider.createToken(authReq.getEmail(), member.get().getRoles());
+            String token = jwtTokenProvider.createToken(member.get());
 
-            return new ResponseEntity<>(token, HttpStatus.OK);
+            AuthenticationResponse authResponse = new AuthenticationResponse(member.get().getFirstName(),
+                    member.get().getLastName(), member.get().getEmail(), token);
+
+            response.setObject(authResponse);
+            response.setSuccess(true);
+
+            return new ResponseEntity<>(response, HttpStatus.OK);
 
         } catch (AuthenticationException e) {
-            return new ResponseEntity<>(HttpStatus.EXPECTATION_FAILED);
+            response.setMessage(Collections.singletonList("Username/Password incorrect"));
+            response.setSuccess(false);
+            return new ResponseEntity<>(response, HttpStatus.OK);
         }
-    }
-    
-    @RequestMapping(value= "/**", method=RequestMethod.OPTIONS)
-    public void corsHeaders(HttpServletResponse response) {
-        response.addHeader("Access-Control-Allow-Origin", "*");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
-        response.addHeader("Access-Control-Max-Age", "3600");
     }
 }

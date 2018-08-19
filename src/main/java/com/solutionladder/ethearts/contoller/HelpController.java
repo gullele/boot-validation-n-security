@@ -1,11 +1,16 @@
 package com.solutionladder.ethearts.contoller;
 
+import java.io.IOException;
+
 import javax.validation.Valid;
 
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,24 +24,28 @@ import com.solutionladder.ethearts.model.response.GenericResponse;
 import com.solutionladder.ethearts.persistence.entity.Contribution;
 import com.solutionladder.ethearts.persistence.entity.Help;
 import com.solutionladder.ethearts.persistence.entity.HelpType;
+import com.solutionladder.ethearts.persistence.entity.Member;
+import com.solutionladder.ethearts.security.CustomUser;
+import com.solutionladder.ethearts.security.JwtTokenProvider;
 import com.solutionladder.ethearts.service.HelpService;
 
 /**
  * Controller class for handling Help.
+ * 
  * @author Kaleb Woldearegay <kaleb@solutionladder.com>
  * 
  * @todo Move the CORS implementation to its own config
  *
  */
 @RestController
-@RequestMapping(path="/help")
-@CrossOrigin(origins = {"*"})
-public class HelpController extends BaseController{
+@RequestMapping(path = "/api/help")
+@CrossOrigin(origins = { "*" })
+public class HelpController extends BaseController {
 
     @Autowired
     private HelpService helpService;
 
-    @GetMapping(path= {"", "/"})
+    @GetMapping(path = { "", "/" })
     @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
     public Iterable<Help> list() {
         return this.helpService.getAll();
@@ -44,77 +53,94 @@ public class HelpController extends BaseController{
 
     /**
      * Update help
+     * 
      * @param help
      * @return
      */
-    @PutMapping(path= {"", "/"})
+    @PutMapping(path = { "", "/" })
     @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
-    public ResponseEntity<Help> edit(
-            @Valid @RequestBody Help help) {
+    public ResponseEntity<Help> edit(@Valid @RequestBody Help help) {
         this.helpService.save(help);
         return new ResponseEntity<>(help, HttpStatus.OK);
     }
 
-    @PostMapping(
-            path= {"/helptype", "/helptype/"},
-            consumes="application/json",
-            produces="application/json")
+    /**
+     * Save help
+     * 
+     * @param help
+     * @return
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
+     */
+    @PostMapping(path = { "", "/" }, consumes = "application/json", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
+    public ResponseEntity<Help> save(@Valid @RequestBody Help help)
+            throws JsonParseException, JsonMappingException, IOException {
+
+        CustomUser user = (CustomUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Member member = new Member();
+        member.setId(user.getMemberId());
+
+        help.setMember(member);
+        this.helpService.save(help);
+        return new ResponseEntity<>(help, HttpStatus.OK);
+    }
+
+    @PostMapping(path = { "/helptype", "/helptype/" }, consumes = "application/json", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADMINISTRATOR')")
-    public ResponseEntity<GenericResponse> addHelpType(
-            @Valid @RequestBody HelpType helpType,
+    public ResponseEntity<GenericResponse> addHelpType(@Valid @RequestBody HelpType helpType,
             BindingResult bindingResult) {
-        
+
         if (bindingResult.hasErrors()) {
             return this.checkValidationErrors(bindingResult);
         }
-        
+
         this.helpService.save(helpType);
         return new ResponseEntity<>(null, HttpStatus.CREATED);
     }
 
     /**
-     * Adding contribution per help. Anyone can help to the posted help as contribution.
-     * For this to work
-     * 1. First use member/authenticate to get the token
-     * 2. pass the token through header with key x-auth-token along with the contribute body
-     * Sample: {"help":{"id":1}, "message":"I want to help in resource", "member":{"id":1}, "helpType":{"id":1}}
+     * Adding contribution per help. Anyone can help to the posted help as
+     * contribution. For this to work 1. First use member/authenticate to get
+     * the token 2. pass the token through header with key x-auth-token along
+     * with the contribute body Sample: {"help":{"id":1}, "message":"I want to
+     * help in resource", "member":{"id":1}, "helpType":{"id":1}}
+     * 
      * @param contribution
      * @param bindingResult
      * @return
      */
-    @PostMapping(
-            path= {"/support", "/support/"},
-            consumes="application/json",
-            produces="application/json")
+    @PostMapping(path = { "/support", "/support/" }, consumes = "application/json", produces = "application/json")
     @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
-    public ResponseEntity<GenericResponse> addHelpContribution(
-            @Valid @RequestBody Contribution contribution,
+    public ResponseEntity<GenericResponse> addHelpContribution(@Valid @RequestBody Contribution contribution,
             BindingResult bindingResult) {
-        
+
         if (bindingResult.hasErrors()) {
             return this.checkValidationErrors(bindingResult);
         }
-        
+
         this.helpService.saveContribution(contribution);
         return new ResponseEntity<>(null, HttpStatus.CREATED);
     }
-    
+
     public ResponseEntity<GenericResponse> addHelpResource() {
         return null;
     }
 
-    /**
-     * Create help.
-     * @see 
-     */
-    @PostMapping(
-            path= {"/", ""}, 
-            consumes="application/json", 
-            produces="application/json")
-    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
-    public ResponseEntity<Help> create(
-            @Valid @RequestBody Help help) {
-        this.helpService.save(help);
-        return new ResponseEntity<>(help, HttpStatus.CREATED);
-    }
+    // /**
+    // * Create help.
+    // * @see
+    // */
+    // @PostMapping(
+    // path= {"/", ""},
+    // consumes="application/json",
+    // produces="application/json")
+    // @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
+    // public ResponseEntity<Help> create(
+    // @Valid @RequestBody Help help) {
+    // this.helpService.save(help);
+    // return new ResponseEntity<>(help, HttpStatus.CREATED);
+    // }
 }

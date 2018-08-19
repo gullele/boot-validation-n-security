@@ -2,7 +2,6 @@ package com.solutionladder.ethearts.security;
 
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -15,9 +14,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Component;
 
-import com.solutionladder.ethearts.persistence.entity.Role;
+import com.solutionladder.ethearts.persistence.entity.Member;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -51,11 +51,12 @@ public class JwtTokenProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String createToken(String email, List<Role> roles) {
+    public String createToken(Member member) {
 
-        Claims claims = Jwts.claims().setSubject(email);
-        claims.put("auth", roles.stream().map(s -> new SimpleGrantedAuthority(s.getAuthority()))
+        Claims claims = Jwts.claims().setSubject(member.getEmail());
+        claims.put("auth", member.getRoles().stream().map(s -> new SimpleGrantedAuthority(s.getAuthority()))
                 .filter(Objects::nonNull).collect(Collectors.toList()));
+        claims.put("memberId", member.getId());
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
@@ -80,6 +81,10 @@ public class JwtTokenProvider {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
+    public String getValueFroToken(String key, String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get(key).toString();
+    }
+
     public String resolveToken(HttpServletRequest req) {
         String bearerToken = req.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
@@ -97,5 +102,20 @@ public class JwtTokenProvider {
             throw new Exception("Expired or invalid JWT token");
         }
     }
+    
+    /*
+     * here is a way to access token should there be any need for it in the controller 
+     * 
+     * HttpServletRequest req - this can be injected directly in the method under @Controller
+        String bearerToken = req.getHeader("Authorization"); //reading the header
+        String token = "";
+        //check how you will get the token from the system.
+        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+            token = bearerToken.substring(7, bearerToken.length());
+        }
+        
+        String memberId = this.jwtProvider.getValueFroToken("memberId", token); //using the method 
+
+     */
 
 }

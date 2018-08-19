@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -32,21 +33,28 @@ public class CustomUserDetails implements UserDetailsService {
 
             Member user = member.get();
 
-            Hibernate.initialize(user.getRoles());
-            UserDetails detail = org.springframework.security.core.userdetails.User
-                    .withUsername(email)
-                    .password(user.getPasswordHash())
-                    .authorities(user.getRoles())
-                    .accountExpired(false)
-                    .accountLocked(false)
-                    .credentialsExpired(false)
-                    .disabled(false)
-                    .build();
-            return detail;
+            Hibernate.initialize(user.getRoles());//get roles going
+            
+            return this.getCustomSecurityUser(user);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-
+    
+    /**
+     * Get custom user
+     * @param member
+     * @return
+     */
+    private User getCustomSecurityUser(Member member) {
+        CustomUser user = new CustomUser(
+                member.getEmail(), member.getPasswordHash(), true, true, true, true, member.getRoles()
+                );
+        user.setMemberId(member.getId());
+        user.setLastName(member.getLastName());
+        user.setFirstName(member.getFirstName());
+        
+        return user;
+    }
 }

@@ -25,7 +25,7 @@ import com.solutionladder.ethearts.service.DonationService;
  * @date 11 - Aug - 2018
  */
 @RestController
-@RequestMapping(path = "/contribution")
+@RequestMapping(path = "/api/contribution")
 @CrossOrigin(origins = "*")
 public class ContributionController extends BaseController {
 
@@ -74,9 +74,7 @@ public class ContributionController extends BaseController {
         if (bindingResult.hasErrors()) {
             return this.checkValidationErrors(bindingResult);
         }
-        System.out.println(">>>>>>>>>>>>>>>>>>" + deposit);
-        //System.out.println(deposit.getMember());
-        //System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> and the id is " + deposit.getMember().getId());
+
         if (deposit.getDeposit() >= 0.2d) {
             deposit = this.donationService.saveDeposit(deposit);
             return new ResponseEntity<>(null, HttpStatus.CREATED);
