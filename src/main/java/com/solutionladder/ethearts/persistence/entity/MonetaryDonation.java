@@ -6,7 +6,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Keeps track of how much a member has donated to the cause
@@ -31,13 +33,14 @@ public class MonetaryDonation extends DatedEntity {
         this.id = id;
     }
 
+    @NotNull(message="Help cannot be null")
     @ManyToOne
     private Help help;
 
     @ManyToOne
     private Member member;
 
-    @NotEmpty
+    @NotNull(message="contribution cannot be null")
     private Double contribution;
 
     public Help getHelp() {

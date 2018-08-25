@@ -83,16 +83,4 @@ public abstract class BaseController {
 
         return response;
     }
-
-    /**
-     * Get logged member from token. Basically the token will contain lots of
-     * information about the logged user and one of the info will be mebmerId,
-     * username and maybe email The member provided by this class does not
-     * contain full member information
-     * 
-     * @return
-     */
-    protected Member getLoggedMemberId() {
-        return null;
-    }
 }

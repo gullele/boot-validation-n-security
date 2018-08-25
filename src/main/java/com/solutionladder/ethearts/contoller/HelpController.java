@@ -1,7 +1,6 @@
 package com.solutionladder.ethearts.contoller;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -30,6 +29,8 @@ import com.solutionladder.ethearts.service.HelpService;
 
 /**
  * Controller class for handling Help.
+ * 
+ * This class mainly focuses on facilitating initial help to be posted.
  * 
  * @author Kaleb Woldearegay <kaleb@solutionladder.com>
  * 
@@ -132,19 +133,4 @@ public class HelpController extends BaseController {
     public ResponseEntity<GenericResponse> addHelpResource() {
         return null;
     }
-
-    // /**
-    // * Create help.
-    // * @see
-    // */
-    // @PostMapping(
-    // path= {"/", ""},
-    // consumes="application/json",
-    // produces="application/json")
-    // @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
-    // public ResponseEntity<Help> create(
-    // @Valid @RequestBody Help help) {
-    // this.helpService.save(help);
-    // return new ResponseEntity<>(help, HttpStatus.CREATED);
-    // }
 }

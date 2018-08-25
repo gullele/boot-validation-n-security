@@ -15,6 +15,8 @@ import javax.persistence.OneToMany;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Model representing help database
  * 
@@ -26,8 +28,8 @@ import javax.validation.constraints.NotNull;
  *
  */
 @Entity
-public class Help extends DatedEntity{
-    
+public class Help extends DatedEntity {
+
     @ManyToMany
     @JoinTable(name = "help_category", joinColumns = @JoinColumn(name = "help_id", referencedColumnName = "id", unique = false), inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id", unique = false))
     @NotNull(message = "Category cannot be blank")
@@ -46,7 +48,7 @@ public class Help extends DatedEntity{
     @ManyToMany
     private List<HelpType> helpType;
 
-    @OneToMany(mappedBy = "help", fetch=FetchType.LAZY)
+    @OneToMany(mappedBy = "help", fetch = FetchType.LAZY)
     private List<MonetaryDonation> donations;
 
     public List<Category> getCategories() {
@@ -98,20 +100,21 @@ public class Help extends DatedEntity{
         this.categories = Optional.ofNullable(this.categories).orElse(Collections.emptyList());
         this.categories.add(category);
     }
-    
+
     public void setDonations(List<MonetaryDonation> donations) {
         this.donations = donations;
     }
-    
+
+    @JsonIgnore()
     public List<MonetaryDonation> getDonations() {
         return this.donations;
     }
-    
+
     public void addDonations(MonetaryDonation donation) {
         if (this.donations == null) {
             this.donations = new ArrayList<MonetaryDonation>();
         }
-        
+
         this.donations.add(donation);
     }
 
@@ -122,7 +125,7 @@ public class Help extends DatedEntity{
             }
         };
     }
-    
+
 }
 
 @FunctionalInterface
