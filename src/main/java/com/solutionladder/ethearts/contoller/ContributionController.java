@@ -51,6 +51,7 @@ public class ContributionController extends BaseController {
             return this.checkValidationErrors(bindingResult);
         }
 
+        GenericResponse response = this.getInitalGenericResponse();
         Member member = this.getCurrentMember();
         donation.setMember(member);
         /*
@@ -64,17 +65,17 @@ public class ContributionController extends BaseController {
         // save the donation
         boolean canDonate = this.donationService.canDonate(donation.getMember(), donation.getContribution());
         logger.info("Current total donatable amount is " + this.donationService.getDonatableAmount(member));
+        HttpStatus status = HttpStatus.OK;
+        
         if (canDonate) {
+            response.setSuccess(true);
             this.donationService.saveDonation(donation);
         } else {
-            return new ResponseEntity<>(null, HttpStatus.OK); // header sent as
-                                                              // OK for
-                                                              // insufficient
-                                                              // fund
+            response.setMessage(Arrays.asList("Insufficient amount. Lets put more deposit first"));
+            status = HttpStatus.BAD_REQUEST;
         }
 
-        return new ResponseEntity<>(null, HttpStatus.CREATED); // header sent as
-                                                               // created
+        return new ResponseEntity<>(response, status); 
     }
 
     /**

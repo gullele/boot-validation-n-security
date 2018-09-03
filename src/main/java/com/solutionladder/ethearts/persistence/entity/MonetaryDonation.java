@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -39,6 +40,7 @@ public class MonetaryDonation extends DatedEntity {
     private Member member;
 
     @NotNull(message="contribution cannot be null")
+    @DecimalMin(value="0.01", message="The minimum contribution is 1 cent")
     private Double contribution;
 
     public Help getHelp() {
