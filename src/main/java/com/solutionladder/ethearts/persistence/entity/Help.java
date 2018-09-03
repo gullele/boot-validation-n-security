@@ -5,10 +5,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -36,6 +39,7 @@ public class Help extends DatedEntity {
     private List<Category> categories;
 
     @NotEmpty(message = "Message can not be blank")
+    @Column(columnDefinition="TEXT")
     private String message;
 
     @NotEmpty(message = "Title can not be null")
@@ -50,6 +54,9 @@ public class Help extends DatedEntity {
 
     @OneToMany(mappedBy = "help", fetch = FetchType.LAZY)
     private List<MonetaryDonation> donations;
+
+    @OneToMany(mappedBy = "help", fetch = FetchType.LAZY, cascade= {CascadeType.PERSIST, CascadeType.MERGE})
+    private List<HelpResource> resources;
 
     public List<Category> getCategories() {
         return categories;
@@ -116,6 +123,35 @@ public class Help extends DatedEntity {
         }
 
         this.donations.add(donation);
+    }
+
+    /**
+     * Add resources to help
+     * 
+     * @param resource
+     */
+    public void addHelpResource(HelpResource resource) {
+        if (this.resources == null) {
+            this.resources = new ArrayList<>();
+        }
+
+        this.resources.add(resource);
+    }
+
+    /**
+     * set resources
+     * @param resources
+     */
+    public void setResources(List<HelpResource> resources) {
+        this.resources = resources;
+    }
+
+    /**
+     * get resources
+     * @return
+     */
+    public List<HelpResource> getResources() {
+        return this.resources;
     }
 
     public AddObject<Category> add() {
