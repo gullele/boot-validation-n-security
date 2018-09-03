@@ -34,9 +34,8 @@ public class DonationService {
         if (member == null) {
             return 0d;
         }
-        // get the current contribution by user and compare it with the money.
-        return 5d;
-        //return this.donationRepository.getDonatableMoney(member);
+
+        return this.donationRepository.getDonatableMoney(member.getId());
     }
 
     /**

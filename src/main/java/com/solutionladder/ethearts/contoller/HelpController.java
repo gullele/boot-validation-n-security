@@ -1,7 +1,8 @@
 package com.solutionladder.ethearts.contoller;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.validation.Valid;
 
@@ -25,11 +26,14 @@ import com.solutionladder.ethearts.model.errorhandler.InvalidArgumentException;
 import com.solutionladder.ethearts.model.response.GenericResponse;
 import com.solutionladder.ethearts.persistence.entity.Contribution;
 import com.solutionladder.ethearts.persistence.entity.Help;
+import com.solutionladder.ethearts.persistence.entity.HelpResource;
 import com.solutionladder.ethearts.persistence.entity.HelpType;
 import com.solutionladder.ethearts.service.HelpService;
 
 /**
  * Controller class for handling Help.
+ * 
+ * This class mainly focuses on facilitating initial help to be posted.
  * 
  * @author Kaleb Woldearegay <kaleb@solutionladder.com>
  * 
@@ -81,8 +85,8 @@ public class HelpController extends BaseController {
         this.helpService.save(help);
         return new ResponseEntity<>(help, HttpStatus.OK);
     }
-    
-    @GetMapping(path = {"{id}", "/{id}"})
+
+    @GetMapping(path = { "{id}", "/{id}" })
     @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
     public Help getById(@PathVariable("id") Long id) {
         if (id == null || id <= 0) {
@@ -129,22 +133,52 @@ public class HelpController extends BaseController {
         return new ResponseEntity<>(null, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<GenericResponse> addHelpResource() {
-        return null;
+    /**
+     * Save the comment associated with the help. This HelpResource will be used
+     * when associating with files as well, but if no resource is provided,
+     * comment will be handled.
+     * 
+     * @param HelpResoure
+     *            helpResource
+     */
+    @PostMapping(path = { "/comments", "/comments/" }, consumes = "application/json", produces = "application/json")
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
+    public ResponseEntity<GenericResponse> addHelpComment(@Valid @RequestBody HelpResource helpResource,
+            BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return this.checkValidationErrors(bindingResult);
+        }
+
+        GenericResponse response = new GenericResponse();
+        helpResource = this.helpService.saveHelpResource(helpResource);
+        
+        if (helpResource == null) {
+            response.setMessage(Arrays.asList("Please check input values"));
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        
+        response.setSuccess(true);
+        response.setObject(helpResource);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // /**
-    // * Create help.
-    // * @see
-    // */
-    // @PostMapping(
-    // path= {"/", ""},
-    // consumes="application/json",
-    // produces="application/json")
-    // @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
-    // public ResponseEntity<Help> create(
-    // @Valid @RequestBody Help help) {
-    // this.helpService.save(help);
-    // return new ResponseEntity<>(help, HttpStatus.CREATED);
-    // }
+    /**
+     * As of now, comments are basically help resources with blank resource
+     * 
+     * @todo - get comment by itself, it need moderation..
+     * @param helpId
+     * @return list of comments
+     */
+    @GetMapping(path = { "/comments/{helpId}", "/comments/{helpId}/" })
+    @PreAuthorize("hasRole('ROLE_ADMINISTRATOR') or hasRole('ROLE_USER')")
+    public ResponseEntity<GenericResponse> getHelpComments(@PathVariable Long helpId) {
+        // get the help first
+        List<HelpResource> comments = this.helpService.getComments(helpId);
+        if (comments == null) // invalid help
+            return null;
+
+        GenericResponse response = new GenericResponse();
+        response.setObject(comments);
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }

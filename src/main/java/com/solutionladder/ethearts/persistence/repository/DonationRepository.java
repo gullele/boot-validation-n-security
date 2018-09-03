@@ -1,5 +1,6 @@
 package com.solutionladder.ethearts.persistence.repository;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -13,8 +14,8 @@ import com.solutionladder.ethearts.persistence.entity.MonetaryDonation;
  */
 @Repository
 public interface DonationRepository extends CrudRepository<MonetaryDonation, Long> {
-
-    //select ( (select sum(d.deposit) from deposit) - (select sum(d.donation) from donations);
-    //@Query("SELECT SUM(d.deposit) FROM Deposit d WHERE d.member = :member")
-    //public Double getDonatableMoney(@Param("member") Member memeber);
+    
+    @Query(value="select ( select sum(deposit) from deposit where member_id = :memberId) - (select sum(contribution) from monetary_donation where member_id = :memberId) as current_value", 
+            nativeQuery=true)
+    public Double getDonatableMoney(Long memberId);
 }
