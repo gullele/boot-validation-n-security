@@ -12,12 +12,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Transient;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.solutionladder.ethearts.model.errorhandler.MinimumAge;
 import com.solutionladder.ethearts.model.errorhandler.UniqueEmail;
 import com.solutionladder.ethearts.security.TokenUtil;
 
@@ -40,6 +40,7 @@ public class Member extends DatedEntity{
     @Email
     @Column(unique = true)
     @UniqueEmail
+    @NotNull
     private String email;
     
     /**
@@ -49,6 +50,7 @@ public class Member extends DatedEntity{
     @JsonProperty(access = Access.WRITE_ONLY)
     private String salt;
 
+    @NotNull
     @Transient
     @NotEmpty(message = "Password cannot be empty")
     @JsonProperty(access = Access.WRITE_ONLY)
@@ -57,7 +59,7 @@ public class Member extends DatedEntity{
     @JsonIgnore
     private String passwordHash;
 
-    @MinimumAge(value = 18)
+    //@MinimumAge(value = 18)
     private LocalDate dateOfBirth;
 
     /**
